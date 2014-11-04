@@ -56,6 +56,7 @@ public class BookController {
 	}
 	
 	public List<Book> getBooks( String title, String author ) throws WebServiceException{
+		bookList = new ArrayList<Book>();
 		List<Book> bookListByTitle = new ArrayList<Book>();
 		List<Book> bookListByAuthor = new ArrayList<Book>();
 		if(!title.equals("")){
