@@ -1,22 +1,15 @@
 package model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name = "book")
-@XmlAccessorType(XmlAccessType.FIELD)
 /**
- * 
+ * Book data model.
+ * Contain id, title and . 
  * @author Veerapat Threeravipark 5510547022
  *
  */
 public class Book {
-	@XmlAttribute
 	private int id;
 	private String title;
-	private String actor;
+	private String author;
 
 	/**
 	 * Constructor of this class.
@@ -26,15 +19,16 @@ public class Book {
 	}
 
 	/**
-	 * 
-	 * @param id
-	 * @param title
-	 * @param actor
+	 * Constructor of this class.
+	 * That initial id, title and author.
+	 * @param id identifier of book
+	 * @param title title of book
+	 * @param author author of book 
 	 */
-	public Book(int id, String title, String actor) {
+	public Book(int id, String title, String author) {
 		this.id = id;
 		this.title = title;
-		this.actor = actor;
+		this.author = author;
 	}
 
 	public int getId() {
@@ -53,12 +47,12 @@ public class Book {
 		this.title = title;
 	}
 
-	public String getActor() {
-		return actor;
+	public String getAuthor() {
+		return author;
 	}
 
-	public void setActor(String actor) {
-		this.actor = actor;
+	public void setAuthor(String author) {
+		this.author = author;
 	}
 
 	@Override

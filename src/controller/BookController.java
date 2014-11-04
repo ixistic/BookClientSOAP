@@ -14,7 +14,8 @@ import com.williamsportwebdeveloper.BookServices;
 import com.williamsportwebdeveloper.BookServicesSoap;
 
 /**
- * 
+ * Controller class for client service to query book database. 
+ * Use unmarshal to convert String to object(BooK).
  * @author Veerapat Threeravipark 5510547022
  *
  */
@@ -24,8 +25,8 @@ public class BookController {
 	private List<Book> bookList;
 	
 	/**
-	 * 
-	 * @throws WebServiceException
+	 * Constructor of this class.
+	 * @throws WebServiceException when network connection error
 	 */
 	public BookController() throws WebServiceException{
 		try{
@@ -38,23 +39,30 @@ public class BookController {
 	}
 	
 	/**
-	 * 
-	 * @param title
-	 * @return
+	 * Get books in database by book's title.
+	 * @param title title of book
+	 * @return list of book that query by title 
 	 */
 	public List<Book> getBooksByTitle( String title ){
 		return getBooks(title,"");
 	}
 	
 	/**
-	 * 
-	 * @param author
-	 * @return
+	 * Get books in database by book's author.
+	 * @param author author of book
+	 * @return list of book that query by author 
 	 */
 	public List<Book> getBooksByAuthor( String author ){
 		return getBooks("", author);
 	}
 	
+	/**
+	 * Get books in database by book's title and book's author.
+	 * @param title title of book
+	 * @param author author of book
+	 * @return list of book that query by title and author 
+	 * @throws WebServiceException when network connection error
+	 */
 	public List<Book> getBooks( String title, String author ) throws WebServiceException{
 		bookList = new ArrayList<Book>();
 		List<Book> bookListByTitle = new ArrayList<Book>();
@@ -91,9 +99,9 @@ public class BookController {
 	}
 	
 	/**
-	 * 
-	 * @param result
-	 * @return
+	 * Unmarshal to convert String to object(Book).
+	 * @param result respond from SOAP web service
+	 * @return list of book
 	 */
 	public List<Book> unmarshall( String result ){
 		List<Book> books = new ArrayList<Book>();
@@ -112,9 +120,9 @@ public class BookController {
 	}
 	
 	/**
-	 * 
-	 * @param result
-	 * @return
+	 * Format raw response data from server to clean data
+	 * @param result raw respond data
+	 * @return String array of books
 	 */
 	public String[] formatData(String result){
 		if(!result.isEmpty() && !result.equals("[]") && result.length() >= 2){
