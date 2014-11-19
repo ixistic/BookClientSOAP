@@ -1,4 +1,4 @@
-package controller;
+package ku.book.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,10 @@ import java.util.regex.Pattern;
 
 import javax.xml.ws.WebServiceException;
 
-import view.BookClientUI;
+import ku.book.model.Book;
+import ku.book.view.BookClientUI;
 
-import model.Book;
+
 
 import com.williamsportwebdeveloper.BookServices;
 import com.williamsportwebdeveloper.BookServicesSoap;

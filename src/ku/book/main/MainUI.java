@@ -1,6 +1,6 @@
-package main;
+package ku.book.main;
 
-import view.BookClientUI;
+import ku.book.view.BookClientUI;
 
 /**
  * Main class. Start the program from here.

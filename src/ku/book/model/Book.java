@@ -1,4 +1,4 @@
-package model;
+package ku.book.model;
 
 /**
  * Book data model.

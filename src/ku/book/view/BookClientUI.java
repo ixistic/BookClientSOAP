@@ -1,4 +1,4 @@
-package view;
+package ku.book.view;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -16,11 +16,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.ws.WebServiceException;
 
-import model.Book;
-import controller.BookController;
+import ku.book.controller.BookController;
+import ku.book.model.Book;
+
 
 /**
  * Initiate UI component show the user interface.
@@ -48,18 +50,15 @@ public class BookClientUI extends JFrame {
 
 	private BookWorker bw;
 	private List<Book> bookList;
+	private Timer timer;
 
 	/**
 	 * Constructor of this class. Naming Jframe. Init user interface.
 	 */
 	public BookClientUI() {
 		super("Book Search Engine");
-		try {
-			bookController = new BookController();
-		} catch (WebServiceException wse) {
-			showMessage("Network connection error.");
-		}
 		bookList = new ArrayList<Book>();
+		timer = null;
 		initComponents();
 	}
 
@@ -130,29 +129,47 @@ public class BookClientUI extends JFrame {
 		getContentPane().add(panel);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+
+		// timeout check 10 second
+		timer = new Timer(10000, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				timer.stop();
+				if (bw != null)
+					bw.cancel(true);
+				showRetryExit("Please check your network connections");
+			}
+		});
 	}
 
 	/**
 	 * Action of button. That invokes the web service.
 	 */
 	public void actionButton() {
+		// check bookController is exist
 		if (bookController == null) {
+			// check timeout 10 seconds
+			timer.start();
 			try {
 				bookController = new BookController();
 			} catch (WebServiceException wse) {
-				showMessage("Network connection error.");
+				timer.stop();
+				showRetryExit("Please check your network connections");
 			}
+			timer.stop();
 		}
 		if (bookController != null) {
 			setProgressBar(0);
 			clearOldData();
+			// Search button
 			if (submit_btn.getText().equals("Search")) {
 				submit_btn.setText("Cancel");
 				bw = new BookWorker();
 				bw.execute();
-			} else {
+			}
+			// Cancel button
+			else {
 				bw.cancel(true);
-				setProgressBar(0);
 				submit_btn.setText("Search");
 			}
 		}
@@ -169,7 +186,7 @@ public class BookClientUI extends JFrame {
 		try {
 			books = bookController.getBooks(title, author);
 		} catch (WebServiceException wse) {
-			showMessage("Network connection error.");
+			books = showRetryExit("Please check your network connections");
 		}
 		return books;
 	}
@@ -187,6 +204,7 @@ public class BookClientUI extends JFrame {
 			setProgressBar(100);
 			submit_btn.setText("Search");
 		} else {
+			setProgressBar(100);
 			showMessage("No result");
 		}
 	}
@@ -221,7 +239,51 @@ public class BookClientUI extends JFrame {
 		setProgressBar(0);
 		clearOldData();
 		submit_btn.setText("Search");
+	}
 
+	/**
+	 * Notify message by JOptionPane. Provide 2 button Retry and Exit
+	 * 
+	 * @param message
+	 *            text that want to notify
+	 * @return list of book
+	 */
+	public List<Book> showRetryExit(String message) {
+		String[] options = { "Exit", "Retry" };
+		int choosen = JOptionPane.showOptionDialog(null, message, "Error",
+				JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null,
+				options, options[1]);
+		switch (choosen) {
+		case 0:
+			// Exit selected
+			System.exit(0);
+			break;
+		case 1:
+			// Retry selected
+			timer.start();
+			bookController = null;
+			try {
+				bookController = new BookController();
+			} catch (WebServiceException wse) {
+				timer.stop();
+				showRetryExit("Please check your network connections");
+			}
+			timer.stop();
+			if (bookController != null) {
+				String title = title_input.getText();
+				String author = author_input.getText();
+				return bookController.getBooks(title, author);
+			}
+			break;
+
+		case JOptionPane.CLOSED_OPTION:
+			System.exit(0);
+			break;
+		}
+		setProgressBar(0);
+		clearOldData();
+		submit_btn.setText("Search");
+		return null;
 	}
 
 	/**
@@ -234,13 +296,16 @@ public class BookClientUI extends JFrame {
 
 		@Override
 		protected List<Book> doInBackground() throws Exception {
+
 			bookList = fetchData();
 			return null;
 		}
 
 		@Override
 		protected void done() {
-			updateData();
+			if (!bw.isCancelled()) {
+				updateData();
+			}
 		}
 
 	}

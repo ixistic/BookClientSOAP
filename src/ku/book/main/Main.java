@@ -1,13 +1,14 @@
-package main;
+package ku.book.main;
 
 import java.util.List;
 
-import model.Book;
+import ku.book.controller.BookController;
+import ku.book.model.Book;
+
 
 import com.williamsportwebdeveloper.BookServices;
 import com.williamsportwebdeveloper.BookServicesSoap;
 
-import controller.BookController;
 
 /**
  * Main class. Start the program from here.
