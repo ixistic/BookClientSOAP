@@ -51,6 +51,7 @@ public class BookClientUI extends JFrame {
 	private BookWorker bw;
 	private List<Book> bookList;
 	private Timer timer;
+	private Timer timer2;
 
 	/**
 	 * Constructor of this class. Naming Jframe. Init user interface.
@@ -130,8 +131,8 @@ public class BookClientUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
-		// timeout check 10 second
-		timer = new Timer(10000, new ActionListener() {
+		// timeout check 5 seconds
+		timer = new Timer(5000, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				timer.stop();
@@ -140,29 +141,26 @@ public class BookClientUI extends JFrame {
 				showRetryExit("Please check your network connections");
 			}
 		});
+		
+		// timeout check 3 seconds
+		timer2 = new Timer(3000, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				timer.stop();
+				progressBar.setValue(0);
+			}
+		});
 	}
 
 	/**
 	 * Action of button. That invokes the web service.
 	 */
 	public void actionButton() {
-		// check bookController is exist
-		if (bookController == null) {
-			// check timeout 10 seconds
-			timer.start();
-			try {
-				bookController = new BookController();
-			} catch (WebServiceException wse) {
-				timer.stop();
-				showRetryExit("Please check your network connections");
-			}
-			timer.stop();
-		}
-		if (bookController != null) {
 			setProgressBar(0);
 			clearOldData();
 			// Search button
 			if (submit_btn.getText().equals("Search")) {
+				setProgressBar(10);
 				submit_btn.setText("Cancel");
 				bw = new BookWorker();
 				bw.execute();
@@ -172,7 +170,7 @@ public class BookClientUI extends JFrame {
 				bw.cancel(true);
 				submit_btn.setText("Search");
 			}
-		}
+//		}
 	}
 
 	/**
@@ -186,7 +184,7 @@ public class BookClientUI extends JFrame {
 		try {
 			books = bookController.getBooks(title, author);
 		} catch (WebServiceException wse) {
-			books = showRetryExit("Please check your network connections");
+			showRetryExit("Please check your network connections");
 		}
 		return books;
 	}
@@ -225,7 +223,13 @@ public class BookClientUI extends JFrame {
 	 *            percent of progress bar
 	 */
 	public void setProgressBar(int value) {
+		timer2.stop();
 		progressBar.setValue(value);
+		if(value == 100){
+			timer2.start();
+		}
+		
+		
 	}
 
 	/**
@@ -248,7 +252,7 @@ public class BookClientUI extends JFrame {
 	 *            text that want to notify
 	 * @return list of book
 	 */
-	public List<Book> showRetryExit(String message) {
+	public void showRetryExit(String message) {
 		String[] options = { "Exit", "Retry" };
 		int choosen = JOptionPane.showOptionDialog(null, message, "Error",
 				JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null,
@@ -259,31 +263,14 @@ public class BookClientUI extends JFrame {
 			System.exit(0);
 			break;
 		case 1:
-			// Retry selected
-			timer.start();
-			bookController = null;
-			try {
-				bookController = new BookController();
-			} catch (WebServiceException wse) {
-				timer.stop();
-				showRetryExit("Please check your network connections");
-			}
-			timer.stop();
-			if (bookController != null) {
-				String title = title_input.getText();
-				String author = author_input.getText();
-				return bookController.getBooks(title, author);
-			}
+			actionButton();
 			break;
 
 		case JOptionPane.CLOSED_OPTION:
 			System.exit(0);
 			break;
 		}
-		setProgressBar(0);
-		clearOldData();
-		submit_btn.setText("Search");
-		return null;
+
 	}
 
 	/**
@@ -296,9 +283,23 @@ public class BookClientUI extends JFrame {
 
 		@Override
 		protected List<Book> doInBackground() throws Exception {
+			if (bookController == null) {
+				// check timeout 5 seconds
+				
+				timer.start();
+				try {
+					bookController = new BookController();
+				} catch (WebServiceException wse) {
+					timer.stop();
+					showRetryExit("Please check your network connections");
+				}
+				timer.stop();
 
-			bookList = fetchData();
-			return null;
+			}
+			if(bookController != null) {
+				bookList = fetchData();
+			}
+			return bookList;
 		}
 
 		@Override
